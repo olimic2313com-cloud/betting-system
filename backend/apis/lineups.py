@@ -14,7 +14,7 @@ def get_lineups(match_id):
     params = {"event_id": match_id}
 
     try:
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers, params=params, timeout=5)
         data = res.json()
     except:
         return []
@@ -22,7 +22,6 @@ def get_lineups(match_id):
     players = []
 
     for team in data.get("data", {}).get("lineups", []):
-
         for p in team.get("players", []):
             players.append({
                 "id": p["player"]["id"],
