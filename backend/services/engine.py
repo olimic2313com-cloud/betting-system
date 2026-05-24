@@ -45,7 +45,7 @@ def run_engine():
             prob = (base_prob * 0.6) + (ml_prob * 0.4)
             edge = prob - (1 / odds)
 
-            if prob > 0.6 and edge > 0.02:
+            if prob > 0.6 and edge > 0.05:
 
                 bets.append({
                     "player": p["name"],
