@@ -1,57 +1,65 @@
+from backend.apis.sofasport import get_live_matches
+from backend.apis.lineups import get_lineups
+from backend.apis.player_stats import get_player_stats
 
-def get_fake_lineup():
-    return [
-        {"name": "Haaland", "position": "ST", "id": "1"},
-        {"name": "Rodri", "position": "CDM", "id": "2"},
-        {"name": "Maguire", "position": "CB", "id": "3"}
-    ]
-
-def calculate_base_prob(avg, line):
-    return min(0.95, avg / (line + 1))
+from backend.models.roles import get_role
+from backend.models.position_zone import get_zone
+from backend.models.matchup import matchup_boost
+from backend.models.xg_model import calc_xg
 
 
 def run_engine():
 
-    lineup = get_fake_lineup()
+    matches = get_live_matches()
     bets = []
 
-    for p in lineup:
+    for m in matches:
 
-        stats = {
-            "shots": 2,
-            "fouls": 1,
-            "tackles": 2
-        }
+        players = get_lineups(m["id"])
 
-        STAT_LINES = {
-            "shots": 1.5,
-            "fouls": 1.5,
-            "tackles": 1.5
-        }
+        for p in players:
 
-    for stat, line in STAT_LINES.items():
+            stats = get_player_stats(p["id"])
 
-        avg = stats.get(stat, 0)
+            if not stats:
+                continue
 
-        base_prob = calculate_base_prob(avg, line)
-        odds = 2.0
+            shots = stats.get("shots", 0)
+            sot = stats.get("sot", 0)
 
-    # ✅ Use base model only (no ML)
-        prob = base_prob
+            if shots == 0:
+                continue
 
-        edge = prob - (1 / odds)
+            role = get_role(p["position"])
+            zone = get_zone(p["position"])
 
-        if prob > 0.6 and edge > 0.05:
+            # ✅ Base probability
+            base_prob = min(0.95, shots / 2)
 
-            bets.append({
-                "player": p["name"],
-                "stat": stat,
-                "line": line,
-                "prob": round(prob, 2),
-                "odds": odds,
-                "edge": round(edge, 3),
-                "reason": "Base model"
-            })
+            # ✅ xG improvement
+            xg = calc_xg(shots, sot)
 
-    bets = sorted(bets, key=lambda x: x["edge"], reverse=True)
+            prob = base_prob * (1 + xg / 2)
+
+            # ✅ simple matchup boost
+            prob *= matchup_boost(p["position"], "CB")  # simplified
+
+            odds = 2.0  # replace later
+            edge = prob - (1 / odds)
+
+            if prob > 0.6:
+
+                bets.append({
+                    "player": p["name"],
+                    "team": m["home"],
+                    "opponent": m["away"],
+                    "stat": "shots",
+                    "prob": round(prob, 2),
+                    "xg": round(xg, 2),
+                    "edge": round(edge, 2),
+                    "role": role,
+                    "zone": zone,
+                    "reason": "real stats + xG + role"
+                })
+
     return bets[:10]
