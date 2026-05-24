@@ -19,13 +19,10 @@ def get_matches_by_date(date):
     }
 
     try:
-        res = requests.get(url, headers=headers, params=params)
+        res = requests.get(url, headers=headers, params=params, timeout=5)
 
         if res.status_code != 200:
-            return {
-                "error": f"status {res.status_code}",
-                "response": res.text
-            }
+            return {"error": f"status {res.status_code}"}
 
         data = res.json()
 
@@ -46,13 +43,22 @@ def get_matches_by_date(date):
 
     matches = []
 
+    allowed_leagues = ["Premier League", "LaLiga"]
+
     for m in events:
+
+        league = m.get("tournament", {}).get("name", "")
+
+        if not any(l in league for l in allowed_leagues):
+            continue
+
         matches.append({
             "id": m.get("id"),
             "home": m.get("homeTeam", {}).get("name"),
             "away": m.get("awayTeam", {}).get("name"),
-            "league": m.get("tournament", {}).get("name"),
+            "league": league,
             "start": m.get("startTimestamp")
         })
 
-    return matches
+    return matches[:5]  # ✅ LIMIT MATCHES
+``
