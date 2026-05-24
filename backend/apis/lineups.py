@@ -1,8 +1,14 @@
-import requests, os
+import requests
+import os
 
 API_KEY = os.getenv("RAPIDAPI_KEY")
 
+CACHE = {}
+
 def get_lineups(match_id):
+
+    if match_id in CACHE:
+        return CACHE[match_id]
 
     url = "https://sofasport.p.rapidapi.com/v1/events/lineups"
 
@@ -14,7 +20,7 @@ def get_lineups(match_id):
     params = {"event_id": match_id}
 
     try:
-        res = requests.get(url, headers=headers, params=params, timeout=5)
+        res = requests.get(url, headers=headers, params=params, timeout=3)
         data = res.json()
     except:
         return []
@@ -28,5 +34,7 @@ def get_lineups(match_id):
                 "name": p["player"]["name"],
                 "position": p["player"]["position"]
             })
+
+    CACHE[match_id] = players
 
     return players
