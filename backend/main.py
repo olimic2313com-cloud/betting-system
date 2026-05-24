@@ -8,19 +8,14 @@ app = FastAPI()
 def home():
     return {
         "status": "✅ Backend running",
-        "endpoints": [
-            "/run"
-        ]
+        "endpoint": "/bets"
     }
 
 
-@app.get("/run")
-def run():
+@app.get("/bets")
+def get_bets():
     try:
-        bets = run_engine()
-        return bets
-
+        return run_engine()
     except Exception as e:
-        return {
-            "error": str(e)
-        }
+        return {"error": str(e)}
+``
