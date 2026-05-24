@@ -2,7 +2,7 @@ import requests, os
 
 API_KEY = os.getenv("RAPIDAPI_KEY")
 
-def get_matches_by_date(date):
+def get_matches_by_date(date=None):
 
     url = "https://sofasport.p.rapidapi.com/v1/events/schedule/upcoming"
 
