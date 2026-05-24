@@ -1,17 +1,25 @@
 import requests, os
+from datetime import datetime
 
 API_KEY = os.getenv("RAPIDAPI_KEY")
 
-def get_live_matches():
+def get_matches_by_date(date=None):
 
-    url = "https://sofasport.p.rapidapi.com/v1/events/schedule/live"
+    if not date:
+        date = datetime.now().strftime("%Y-%m-%d")
+
+    url = "https://sofasport.p.rapidapi.com/v1/events/schedule/date"
 
     headers = {
         "x-rapidapi-key": API_KEY,
         "x-rapidapi-host": "sofasport.p.rapidapi.com"
     }
 
-    res = requests.get(url, headers=headers).json()
+    params = {
+        "date": date
+    }
+
+    res = requests.get(url, headers=headers, params=params).json()
 
     matches = []
 
@@ -19,7 +27,8 @@ def get_live_matches():
         matches.append({
             "id": m["id"],
             "home": m["homeTeam"]["name"],
-            "away": m["awayTeam"]["name"]
+            "away": m["awayTeam"]["name"],
+            "start": m["startTimestamp"]
         })
 
     return matches
