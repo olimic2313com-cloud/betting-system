@@ -16,14 +16,16 @@ def get_player_stats(player_id):
         "player_stat_type": "overall"
     }
 
-    res = requests.get(url, headers=headers, params=params).json()
-
     try:
-        stats = res["data"]
+        res = requests.get(url, headers=headers, params=params)
+        data = res.json()
+
+        stats = data.get("data", {})
 
         return {
             "shots": stats.get("shotsTotal", 0),
             "sot": stats.get("shotsOnTarget", 0)
         }
+
     except:
-        return {}
+        return {"shots": 0, "sot": 0}
