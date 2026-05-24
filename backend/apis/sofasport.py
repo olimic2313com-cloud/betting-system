@@ -22,22 +22,32 @@ def get_matches_by_date(date=None):
 
     try:
         res = requests.get(url, headers=headers, params=params)
+
+        # ✅ CHECK STATUS
+        if res.status_code != 200:
+            return [{"error": f"API status {res.status_code}"}]
+
         data = res.json()
-    except:
-        return [{"error": "API request failed"}]
+
+    except Exception as e:
+        return [{"error": str(e)}]
 
     matches = []
 
-    # ✅ SAFE ACCESS (THIS IS THE FIX)
+    # ✅ HANDLE STRUCTURE SAFELY
     events = data.get("data", {}).get("events", [])
+
+    # ✅ HANDLE NO MATCHES
+    if not events:
+        return [{"status": "no matches found for this date"}]
 
     for m in events:
 
         try:
             matches.append({
-                "id": m["id"],
-                "home": m["homeTeam"]["name"],
-                "away": m["awayTeam"]["name"],
+                "id": m.get("id"),
+                "home": m.get("homeTeam", {}).get("name"),
+                "away": m.get("awayTeam", {}).get("name"),
                 "start": m.get("startTimestamp", 0)
             })
         except:
