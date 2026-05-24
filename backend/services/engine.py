@@ -1,4 +1,3 @@
-from models.ml.predict import predict_prob
 
 def get_fake_lineup():
     return [
