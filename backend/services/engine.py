@@ -7,11 +7,10 @@ def run_engine(date, games=20):
 
     matches = get_matches_by_date(date)
 
-    # ✅ HANDLE ERROR (dict)
+    # ✅ Handle errors
     if isinstance(matches, dict):
         return matches
 
-    # ✅ HANDLE EMPTY
     if not matches:
         return {"status": "no matches"}
 
@@ -19,15 +18,12 @@ def run_engine(date, games=20):
 
     result = []
 
-    for m in matches:
-
-        # ✅ Ensure it's actually a dict
-        if not isinstance(m, dict):
-            continue
+    for m in matches:  # already limited in API
 
         match_data = {
             "home": m.get("home"),
             "away": m.get("away"),
+            "league": m.get("league"),
             "players": []
         }
 
@@ -41,24 +37,18 @@ def run_engine(date, games=20):
             result.append(match_data)
             continue
 
-        for p in players[:5]:
+        for p in players[:5]:  # ✅ limit players
 
             name = p.get("name")
-
             history = cache.get(name, [])
 
             if not isinstance(history, list):
                 history = []
 
-            vs_opponent = [
-                g for g in history if isinstance(g, dict) and g.get("opponent") == m.get("away")
-            ]
-
             match_data["players"].append({
                 "name": name,
                 "position": p.get("position"),
-                "last_games": history[:games],
-                "vs_opponent": vs_opponent[:5]
+                "last_games": history[:games]
             })
 
         result.append(match_data)
