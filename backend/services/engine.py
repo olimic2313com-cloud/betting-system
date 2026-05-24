@@ -5,7 +5,7 @@ from backend.services.cache_manager import load_cache
 
 def run_engine(date, games=20):
 
-    matches = get_matches_by_date(None)
+    matches = get_matches_by_date(date)
 
     if not matches or isinstance(matches[0], dict) and "error" in matches[0]:
         return matches
