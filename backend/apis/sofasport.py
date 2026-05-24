@@ -14,30 +14,37 @@ def get_matches_by_date(date):
 
     params = {
         "date": str(date),
-        "sport_id": "1",        # ✅ MUST BE STRING
-        "inverse": "false"      # ✅ MUST BE STRING
+        "sport_id": "1",
+        "inverse": "false"
     }
 
     try:
         res = requests.get(url, headers=headers, params=params)
 
         if res.status_code != 200:
-            return [{
+            return {
                 "error": f"status {res.status_code}",
                 "response": res.text
-            }]
+            }
 
         data = res.json()
 
     except Exception as e:
-        return [{"error": str(e)}]
+        return {"error": str(e)}
 
-    matches = []
+    data_block = data.get("data")
 
-    events = data.get("data", {}).get("events", [])
+    if isinstance(data_block, dict):
+        events = data_block.get("events", [])
+    elif isinstance(data_block, list):
+        events = data_block
+    else:
+        events = []
 
     if not events:
-        return [{"status": "no matches found"}]
+        return {"status": "no matches found"}
+
+    matches = []
 
     for m in events:
         matches.append({
