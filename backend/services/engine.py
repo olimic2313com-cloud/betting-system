@@ -1,15 +1,16 @@
 from backend.apis.sofasport import get_matches_by_date
 from backend.apis.lineups import get_lineups
-from backend.apis.player_stats import get_player_stats
+from backend.services.cache_manager import load_cache
 
 
-def run_engine(date):
+def run_engine(date, games=20):
 
     matches = get_matches_by_date(date)
 
-    # ✅ if API fails
     if not matches or "error" in matches[0]:
         return matches
+
+    cache = load_cache()
 
     result = []
 
@@ -18,7 +19,6 @@ def run_engine(date):
         match_data = {
             "home": m["home"],
             "away": m["away"],
-            "league": m["league"],
             "players": []
         }
 
@@ -29,15 +29,21 @@ def run_engine(date):
             result.append(match_data)
             continue
 
-        for p in players[:5]:   # ✅ limit for speed
+        for p in players:
 
-            stats = get_player_stats(p["id"])
+            name = p["name"]
+
+            history = cache.get(name, [])[:games]
+
+            vs_opponent = [
+                g for g in history if g["opponent"] == m["away"]
+            ]
 
             match_data["players"].append({
-                "name": p["name"],
+                "name": name,
                 "position": p["position"],
-                "shots": stats.get("shots", 0),
-                "sot": stats.get("sot", 0)
+                "last_games": history,
+                "vs_opponent": vs_opponent[:5]
             })
 
         result.append(match_data)
