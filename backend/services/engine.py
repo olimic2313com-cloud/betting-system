@@ -1,4 +1,4 @@
-from backend.models.ml.predict import predict_prob
+from models.ml.predict import predict_prob
 
 # TEMP DATA until full scraping is added
 def get_fake_lineup():
