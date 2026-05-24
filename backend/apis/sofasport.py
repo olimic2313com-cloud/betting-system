@@ -1,4 +1,5 @@
-import requests, os
+import requests
+import os
 from datetime import datetime
 
 API_KEY = os.getenv("RAPIDAPI_KEY")
@@ -19,16 +20,27 @@ def get_matches_by_date(date=None):
         "date": date
     }
 
-    res = requests.get(url, headers=headers, params=params).json()
+    try:
+        res = requests.get(url, headers=headers, params=params)
+        data = res.json()
+    except:
+        return [{"error": "API request failed"}]
 
     matches = []
 
-    for m in res.get("data", []):
-        matches.append({
-            "id": m["id"],
-            "home": m["homeTeam"]["name"],
-            "away": m["awayTeam"]["name"],
-            "start": m["startTimestamp"]
-        })
+    # ✅ SAFE ACCESS (THIS IS THE FIX)
+    events = data.get("data", {}).get("events", [])
+
+    for m in events:
+
+        try:
+            matches.append({
+                "id": m["id"],
+                "home": m["homeTeam"]["name"],
+                "away": m["awayTeam"]["name"],
+                "start": m.get("startTimestamp", 0)
+            })
+        except:
+            continue
 
     return matches
