@@ -7,4 +7,4 @@ def get_role(pos):
         return "midfielder"
 
     return "attacker"
-``
+
