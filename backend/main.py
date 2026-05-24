@@ -1,12 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from backend.services.engine import run_engine
 
 app = FastAPI()
 
 @app.get("/")
 def home():
-    return {"status": "✅ backend working", "endpoint": "/bets"}
+    return {"status": "working"}
 
 @app.get("/bets")
-def bets():
-    return run_engine()
+def bets(date: str = Query(...)):
+    return run_engine(date)
