@@ -17,13 +17,14 @@ def get_matches_by_date(date=None):
     }
 
     params = {
-        "date": date
+        "date": date,
+        "sport_id": "1",   # ✅ THIS FIXES YOUR ERROR
+        "inverse": "false"
     }
 
     try:
         res = requests.get(url, headers=headers, params=params)
 
-        # ✅ CHECK STATUS
         if res.status_code != 200:
             return [{"error": f"API status {res.status_code}"}]
 
@@ -34,12 +35,10 @@ def get_matches_by_date(date=None):
 
     matches = []
 
-    # ✅ HANDLE STRUCTURE SAFELY
     events = data.get("data", {}).get("events", [])
 
-    # ✅ HANDLE NO MATCHES
     if not events:
-        return [{"status": "no matches found for this date"}]
+        return [{"status": "no matches found"}]
 
     for m in events:
 
