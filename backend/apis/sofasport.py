@@ -13,16 +13,19 @@ def get_matches_by_date(date):
     }
 
     params = {
-        "date": str(date),     # ✅ must be string
-        "sport_id": 1,         # ✅ football
-        "inverse": False       # ✅ correct type (bool)
+        "date": str(date),
+        "sport_id": "1",        # ✅ MUST BE STRING
+        "inverse": "false"      # ✅ MUST BE STRING
     }
 
     try:
         res = requests.get(url, headers=headers, params=params)
 
         if res.status_code != 200:
-            return [{"error": f"status {res.status_code}", "response": res.text}]
+            return [{
+                "error": f"status {res.status_code}",
+                "response": res.text
+            }]
 
         data = res.json()
 
@@ -31,24 +34,18 @@ def get_matches_by_date(date):
 
     matches = []
 
-    # ✅ SAFE EXTRACTION (this is where many fail)
     events = data.get("data", {}).get("events", [])
 
-    # ✅ If no events → return clear message
     if not events:
-        return [{"status": "no matches found for this date"}]
+        return [{"status": "no matches found"}]
 
     for m in events:
-        try:
-            matches.append({
-                "id": m.get("id"),
-                "home": m.get("homeTeam", {}).get("name"),
-                "away": m.get("awayTeam", {}).get("name"),
-                "league": m.get("tournament", {}).get("name"),
-                "start": m.get("startTimestamp")
-            })
-        except:
-            continue
+        matches.append({
+            "id": m.get("id"),
+            "home": m.get("homeTeam", {}).get("name"),
+            "away": m.get("awayTeam", {}).get("name"),
+            "league": m.get("tournament", {}).get("name"),
+            "start": m.get("startTimestamp")
+        })
 
     return matches
-``
