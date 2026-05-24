@@ -1,4 +1,4 @@
-from backend.apis.sofasport import get_live_matches
+from backend.apis.sofasport import get_matches_by_date
 from backend.apis.lineups import get_lineups
 from backend.apis.player_stats import get_player_stats
 
@@ -10,7 +10,7 @@ from backend.models.xg_model import calc_xg
 
 def run_engine():
 
-    matches = get_live_matches()
+    matches = get_matches_by_date()
     bets = []
 
     for m in matches:
