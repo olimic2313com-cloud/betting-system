@@ -1,13 +1,8 @@
-import requests
-import os
-from datetime import datetime
+import requests, os
 
 API_KEY = os.getenv("RAPIDAPI_KEY")
 
-def get_matches_by_date(date=None):
-
-    if not date:
-        date = datetime.now().strftime("%Y-%m-%d")
+def get_matches_by_date(date):
 
     url = "https://sofasport.p.rapidapi.com/v1/events/schedule/date"
 
@@ -18,15 +13,15 @@ def get_matches_by_date(date=None):
 
     params = {
         "date": date,
-        "sport_id": "1",   # ✅ THIS FIXES YOUR ERROR
-        "inverse": "false"
+        "sport_id": 1,
+        "inverse": False
     }
 
     try:
         res = requests.get(url, headers=headers, params=params)
 
         if res.status_code != 200:
-            return [{"error": f"API status {res.status_code}"}]
+            return [{"error": f"status {res.status_code}"}]
 
         data = res.json()
 
@@ -37,19 +32,13 @@ def get_matches_by_date(date=None):
 
     events = data.get("data", {}).get("events", [])
 
-    if not events:
-        return [{"status": "no matches found"}]
-
     for m in events:
-
-        try:
-            matches.append({
-                "id": m.get("id"),
-                "home": m.get("homeTeam", {}).get("name"),
-                "away": m.get("awayTeam", {}).get("name"),
-                "start": m.get("startTimestamp", 0)
-            })
-        except:
-            continue
+        matches.append({
+            "id": m.get("id"),
+            "home": m.get("homeTeam", {}).get("name"),
+            "away": m.get("awayTeam", {}).get("name"),
+            "league": m.get("tournament", {}).get("name"),
+            "start": m.get("startTimestamp")
+        })
 
     return matches
