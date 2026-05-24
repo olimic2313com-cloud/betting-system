@@ -9,13 +9,13 @@ def home():
     return {"status": "working ✅"}
 
 
+
 @app.get("/bets")
 def bets(date: str = None, games: int = 20):
+
+    from datetime import datetime
 
     if not date:
         date = datetime.now().strftime("%Y-%m-%d")
 
-    try:
-        return run_engine(date, games)
-    except Exception as e:
-        return {"error": str(e)}
+    return run_engine(date, games)
